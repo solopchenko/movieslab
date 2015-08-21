@@ -1,0 +1,63 @@
+﻿@{
+    ViewBag.Title = "Список фильмов";
+}
+
+@model PagedList.IPagedList<MoviesLab.Models.Movie>
+@using PagedList.Mvc;
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+<br />
+<br />
+
+<h1>@ViewBag.Title</h1>
+
+
+@if (User.IsInRole("Администратор"))
+{
+    <p><a href="/Movie/Add">Добавить фильм</a></p>
+}
+
+<hr />
+
+<div class="row" id="searchresult">
+
+    @foreach (var m in Model)
+    {
+        <div class="col-md-8">
+            <h3><a href="/Movie?MovieId=@Html.DisplayFor(model => m.MovieId)">@Html.DisplayFor(model => m.TitleWithYear)</a></h3>
+            @if (m.Duration != null)
+            {
+                <p><b>Длительность:</b> @Html.DisplayFor(model => m.Duration) мин.</p>
+            }
+
+            @if (m.Genres != String.Empty)
+            {
+                <p><b>Жанры:</b> @m.Genres</p>
+            }
+
+            @if (m.Countries != String.Empty)
+            {
+                <p><b>Страны</b>: @m.Countries</p>
+            }
+
+            @if (m.Description != null)
+            {
+                <div id="@m.MovieId">
+                    @Ajax.ActionLink("Показать описание", "ShowDescription", new { MovieId = m.MovieId }, new AjaxOptions { UpdateTargetId = m.MovieId.ToString(), InsertionMode = InsertionMode.Replace, HttpMethod = "GET" })
+                </div>
+            }
+
+            <hr />
+        </div>
+    }
+
+    <div class="col-md-10">
+        @Html.PagedListPager(Model, page => Url.Action("List", new { page }))
+        Страница @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) из @Model.PageCount
+    </div>
+
+</div>
+
+@Scripts.Render("~/scripts/jquery-1.10.2.min.js")
+@Scripts.Render("~/scripts/jquery.unobtrusive-ajax.min.js")
