@@ -1,0 +1,79 @@
+﻿@model MoviesLab.Models.Movie
+
+@{
+    ViewBag.Title = @Model.TitleWithYear;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+    <h1>@ViewBag.Title</h1>
+
+    <a href="/Movie/Edit?MovieId=@Model.MovieId" class="btn btn-warning btn-xs">Редактировать фильм</a>
+    <a href="/Movie/Delete?MovieId=@Model.MovieId" class="btn btn-danger btn-xs">Удалить фильм</a>
+
+    <p class="text-success">@ViewBag.StatusMessage</p>
+
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+
+            <p><b>Длительность:</b> @Model.Duration мин.</p>
+            <p><b>Премьера:</b> @Model.Date.Value.ToString("dd.MM.yyyy")</p>
+
+            @if (@Model.Description != null)
+            {
+                <p><b>Описание:</b></p>
+                <p>@Model.Description</p>
+            }
+
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (ViewBag.MovieInFav)
+                {
+                    <p><a class="btn-sm btn-danger" href="/Movie/DeleteFavorite?MovieId=@Model.MovieId">Удалить из избранного</a></p>
+                }
+                else
+                {
+                    <p><a class="btn-sm btn-success" href="/Movie/AddFavorite?MovieId=@Model.MovieId">Добавить в избранное</a></p>
+                }
+            }
+            
+
+            @if (@Model.Genre.Count > 0)
+            {
+                <p><b>Жанры:</b></p>
+                <ul>
+                    @foreach (var g in Model.Genre)
+                    {
+                        <li>@g.Name</li>
+                    }
+                </ul>
+            }
+
+            @if (@Model.Country.Count > 0)
+            {
+                <p><b>Страны:</b></p>
+                <ul>
+                    @foreach (var с in Model.Country)
+                    {
+                        <li>@с.Name</li>
+                    }
+
+                </ul>
+            }
+
+            <div>
+                <a href="/Movie/List">Вернуться к списку фильмов</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

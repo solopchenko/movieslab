@@ -28,6 +28,7 @@ namespace MoviesLab.Models
 
         [Display(Name = "Длительность")]
         [Required(ErrorMessage = "Обязательное поле.")]
+        [Range(0, int.MaxValue, ErrorMessage="Отрицательные числа не допускаются")]
         public int Duration { get; set; }
 
         [Display(Name = "Удален")]

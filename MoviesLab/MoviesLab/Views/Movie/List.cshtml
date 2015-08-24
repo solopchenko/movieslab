@@ -8,15 +8,23 @@
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 
 <br />
-<br />
+
+@using (Ajax.BeginForm("MovieSearch", new AjaxOptions { UpdateTargetId = "searchresult" }))
+{
+    <div class="form-group col-md-4 col-md-offset-8">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Поиск фильмов">
+            <span class="input-group-btn">
+                <input type="submit" value="Найти" class="btn btn-primary" />
+            </span>
+        </div>
+    </div>
+}
 
 <h1>@ViewBag.Title</h1>
 
 
-@if (User.IsInRole("Администратор"))
-{
-    <p><a href="/Movie/Add">Добавить фильм</a></p>
-}
+<a href="/Movie/Add" class="btn btn-success btn-xs">Добавить фильм</a>
 
 <hr />
 
@@ -39,13 +47,6 @@
             @if (m.Countries != String.Empty)
             {
                 <p><b>Страны</b>: @m.Countries</p>
-            }
-
-            @if (m.Description != null)
-            {
-                <div id="@m.MovieId">
-                    @Ajax.ActionLink("Показать описание", "ShowDescription", new { MovieId = m.MovieId }, new AjaxOptions { UpdateTargetId = m.MovieId.ToString(), InsertionMode = InsertionMode.Replace, HttpMethod = "GET" })
-                </div>
             }
 
             <hr />

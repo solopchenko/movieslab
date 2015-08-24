@@ -1,0 +1,38 @@
+﻿@model List<MoviesLab.Models.Movie>
+
+@if (Model.Count < 1)
+{
+    <div class="col-md-8">
+        <p>По Вашему запросу ничего не найдено.</p>
+    </div>
+}
+
+@foreach (var m in Model)
+{
+    <div class="col-md-8">
+        <h3><a href="/Movie?MovieId=@Html.DisplayFor(model => m.MovieId)">@Html.DisplayFor(model => m.TitleWithYear)</a></h3>
+        @if (m.Duration != null)
+        {
+            <p><b>Длительность:</b> @Html.DisplayFor(model => m.Duration) мин.</p>
+        }
+
+        @if (m.Genres != String.Empty)
+        {
+            <p><b>Жанры:</b> @m.Genres</p>
+        }
+
+        @if (m.Countries != String.Empty)
+        {
+            <p><b>Страны</b>: @m.Countries</p>
+        }
+
+        @if (m.Description != null)
+        {
+            <div id="@m.MovieId">
+                @Ajax.ActionLink("Показать описание", "ShowDescription", new { MovieId = m.MovieId }, new AjaxOptions { UpdateTargetId = m.MovieId.ToString(), InsertionMode = InsertionMode.Replace, HttpMethod = "GET" })
+            </div>
+        }
+
+        <hr />
+    </div>
+}
