@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "Список персон";
+}
+
+@model PagedList.IPagedList<MoviesLab.Models.Person>
+@using PagedList.Mvc;
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+<br />
+
+@using (Ajax.BeginForm("PeopleSearch", new AjaxOptions { UpdateTargetId = "searchresult" }))
+{
+    <div class="form-group col-md-4 col-md-offset-8">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Поиск персон">
+            <span class="input-group-btn">
+                <input type="submit" value="Найти" class="btn btn-primary" />
+            </span>
+        </div>
+    </div>
+}
+
+<h3 class="text-info">@ViewBag.StatusMessage</h3>
+
+<h1>@ViewBag.Title</h1>
+
+@if (User.IsInRole("Администратор"))
+{
+    <a href="/Person/Add" class="btn btn-success btn-xs">Добавить Персону</a>
+}
+
+<hr />
+
+
+<div class="row" id="searchresult">
+
+    @foreach (var p in Model)
+    {
+        <div class="col-md-8">
+            <h3><a href="/Person?PersonId=@Html.DisplayFor(model => p.PersonId)">@Html.DisplayFor(model => p.FullnameWithYears)</a></h3>
+
+            @if (p.Age != null)
+            {
+                <p><b>Дата рождения:</b> @Html.DisplayFor(model => p.Birthday) (@Html.DisplayFor(model => p.Age))</p>
+            }
+
+            @if (p.Country != null)
+            {
+                <p><b>Страна:</b> @Html.DisplayFor(model => p.Country.Name)</p>
+            }
+
+            <hr />
+        </div>
+    }
+
+    <div class="col-md-10">
+        @Html.PagedListPager(Model, page => Url.Action("List", new { page }))
+        Страница @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) из @Model.PageCount
+    </div>
+
+</div>
+
+@Scripts.Render("~/scripts/jquery-1.10.2.min.js")
+@Scripts.Render("~/scripts/jquery.unobtrusive-ajax.min.js")

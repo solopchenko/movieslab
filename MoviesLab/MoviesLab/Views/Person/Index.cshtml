@@ -1,0 +1,106 @@
+﻿@model MoviesLab.Models.Person
+
+@{
+    ViewBag.Title = @Model.Fullname;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+    <h3 class="text-info">@ViewBag.StatusMessage</h3>
+
+    <h1>@ViewBag.Title</h1>
+
+    @if (User.IsInRole("Администратор"))
+    {
+        <a href="/Person/Edit?PersonId=@Model.PersonId" class="btn btn-warning btn-xs">Редактировать</a>
+        <a href="/Person/Delete?PersonId=@Model.PersonId" class="btn btn-danger btn-xs">Удалить</a>
+    }
+
+    <p class="text-success">@ViewBag.StatusMessage</p>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+
+            @if (@Model.Birthday != null)
+            {
+                <p><b>Дата рождения (возраст):</b> @Model.Birthday.Value.ToString("dd.MM.yyyy") (@Model.Age)</p>
+            }
+
+            @if (@Model.Country != null)
+            {
+                <p><b>Место рождения:</b> @Model.Country.Name</p>
+            }
+
+            @if (@Model.Obit != null)
+            {
+                <p><b>Дата смерти: </b> @Model.Obit.Value.ToString("dd.MM.yyyy") г.</p>
+            }
+
+            @if (@Model.Biography != null)
+            {
+                <p><b>Краткая биография:</b></p>
+                <p>@Model.Biography</p>
+            }
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (ViewBag.PersonInFav)
+                {
+                    <p><a class="btn-sm btn-danger" href="/Person/DeleteFavorite?PersonId=@Model.PersonId">Удалить из избранного</a></p>
+                }
+                else
+                {
+                    <p><a class="btn-sm btn-success" href="/Person/AddFavorite?PersonId=@Model.PersonId">Добавить в избранное</a></p>
+                }
+            }
+
+            <div>
+                <a href="/Person/List">Вернуться к списку персон</a>
+            </div>
+        </div>
+
+
+
+        <div class="col-md-4">
+            @if (@Model.Actor.Count > 0)
+            {
+                <p><b>Роли в фильмах:</b></p>
+                <ul>
+                    @foreach (var r in Model.Actor)
+                    {
+                        <li>
+                            <a href="/Movie?MovieId=@r.Movie.MovieId">@r.Movie.TitleWithYear</a>
+                            <ul>
+                                <li>@r.Character</li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            }
+
+            @if (@Model.FilmCrew.Count > 0)
+            {
+                <p><b>Участие в фильмах:</b></p>
+                <ul>
+                    @foreach (var r in Model.FilmCrew)
+                    {
+                        <li>
+                            <a href="/Movie?MovieId=@r.Movie.MovieId">@r.Movie.TitleWithYear</a>
+                            <ul>
+                                <li>@r.CrewPosition.Name</li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</body>
+</html>

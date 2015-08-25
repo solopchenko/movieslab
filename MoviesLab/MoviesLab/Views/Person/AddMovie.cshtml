@@ -1,0 +1,43 @@
+﻿@model MoviesLab.Models.FilmCrew
+
+@{
+    ViewBag.Title = ViewBag.Person.Fullname + ": " + "добавление участия в фильме"; ;
+}
+
+<h1>@ViewBag.Title</h1>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.MovieId, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.DropDownListFor(model => model.MovieId, ViewBag.Movies as SelectList, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.MovieId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CrewPosition, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.DropDownListFor(model => model.PositionId, ViewBag.CrewPositions as SelectList, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.PositionId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-5">
+                <input type="submit" value="Добавить участие в фильме" class="btn btn-success btn-sm" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/Person?PersonId=@ViewBag.Person.PersonId">Вернуться к персоне</a>
+</div>

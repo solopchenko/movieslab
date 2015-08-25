@@ -1,0 +1,27 @@
+﻿@model List<MoviesLab.Models.Person>
+
+@if (Model.Count < 1)
+{
+    <div class="col-md-8">
+        <p>По Вашему запросу ничего не найдено.</p>
+    </div>
+}
+
+@foreach (var p in Model)
+{
+    <div class="col-md-8">
+        <h3><a href="/Person?PersonId=@Html.DisplayFor(model => p.PersonId)">@Html.DisplayFor(model => p.FullnameWithYears)</a></h3>
+
+        @if (p.Age != null)
+        {
+            <p><b>Дата рождения:</b> @Html.DisplayFor(model => p.Birthday) (@Html.DisplayFor(model => p.Age))</p>
+        }
+
+        @if (p.Country != null)
+        {
+            <p><b>Страна:</b> @Html.DisplayFor(model => p.Country.Name)</p>
+        }
+
+        <hr />
+    </div>
+}

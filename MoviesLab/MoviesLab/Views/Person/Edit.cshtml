@@ -1,0 +1,116 @@
+﻿@model MoviesLab.Models.Person
+
+@{
+    ViewBag.Title = "Редактирование информации о персоне";
+}
+
+<h1>@ViewBag.Title</h1>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.PersonId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.TextBoxFor(model => model.Name, new { @class = "form-control", @placeholder = "Введите имя персоны" })
+                @Html.ValidationMessageFor(model => model.Name)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Patronymic, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.TextBoxFor(model => model.Patronymic, new { @class = "form-control", @placeholder = "Введите отчество персоны" })
+                @Html.ValidationMessageFor(model => model.Patronymic)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Surname, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.TextBoxFor(model => model.Surname, new { @class = "form-control", @placeholder = "Введите фамилию персоны" })
+                @Html.ValidationMessageFor(model => model.Surname)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Biography, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.TextAreaFor(model => model.Biography, new { @class = "form-control", @placeholder = "Введите краткую биографию" })
+                @Html.ValidationMessageFor(model => model.Biography)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Birthday, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.TextBoxFor(model => model.Birthday, new { @class = "form-control", @placeholder = "Выберите дату рождения персоны", @type = "date" })
+                @Html.ValidationMessageFor(model => model.Birthday)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Obit, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.TextBoxFor(model => model.Obit, new { @class = "form-control", @placeholder = "Выберите дату смерти персоны", @type = "date" })
+                @Html.ValidationMessageFor(model => model.Obit)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CountryId, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.DropDownListFor(model => model.CountryId, ViewBag.Countries as SelectList, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.CountryId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Сохранить изменения" class="btn btn-success btn-sm" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Actor, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                <ul>
+                    @foreach (var r in Model.Actor)
+                    {
+                        <li>@r.Movie.TitleWithYear: @r.Character</li>
+                    }
+                </ul>
+                <p><a class="btn btn-primary btn-sm" href="AddRole?PersonId=@Html.DisplayFor(model => model.PersonId)">Добавить роль</a></p>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FilmCrew, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                <ul>
+                    @foreach (var r in Model.FilmCrew)
+                    {
+                        <li>@r.Movie.TitleWithYear: @r.CrewPosition.Name</li>
+                    }
+                </ul>
+                <p><a class="btn btn-primary btn-sm" href="AddMovie?PersonId=@Html.DisplayFor(model => model.PersonId)">Добавить участие в фильме</a></p>
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/Person?PersonId=@Model.PersonId">Вернуться к персоне</a>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
