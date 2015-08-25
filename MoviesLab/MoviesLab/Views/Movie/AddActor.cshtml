@@ -1,0 +1,48 @@
+﻿@model MoviesLab.Models.Actor
+
+@{
+    ViewBag.Title = ViewBag.Movie.TitleWithYear + ": " + "добавление актера";
+}
+
+<h1>@ViewBag.Title</h1>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PersonId, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.DropDownListFor(model => model.PersonId, ViewBag.People as SelectList, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.PersonId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Character, new { @class = "control-label col-md-2" })
+            <div class="col-md-5">
+                @Html.TextBoxFor(model => model.Character, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Character)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-5">
+                <input type="submit" value="Добавить актера" class="btn btn-success btn-sm" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/Movie?MovieId=@ViewBag.Movie.MovieId">Вернуться к фильму</a>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

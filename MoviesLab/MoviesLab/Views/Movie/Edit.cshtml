@@ -91,7 +91,7 @@
                 <ul>
                     @foreach (var r in Model.Actor)
                     {
-                        <li>@r.Person.Fullname: @r.Character</li>
+                        <li>@r.Person.Fullname: @r.Character (удалить)</li>
                     }
                 </ul>
                 <p><a class="btn btn-primary btn-sm" href="AddActor?MovieId=@Html.DisplayFor(model => model.MovieId)">Добавить актера</a></p>
@@ -104,10 +104,11 @@
                 <ul>
                     @foreach (var r in Model.FilmCrew)
                     {
-                        <li>@r.Person.Fullname: @r.CrewPosition.Name</li>
+                        <li>@r.Person.Fullname: @r.CrewPosition.Name (удалить)</li>
                     }
                 </ul>
                 <p><a class="btn btn-primary btn-sm" href="AddPerson?MovieId=@Html.DisplayFor(model => model.MovieId)">Добавить участника съёмочной группы</a></p>
+                @*<p> @Html.ActionLink("Добавить", "AddActor1", "Movie", new { movieId = Model.MovieId, @class = "viewDialog", data_dialog_title = "Создание модели" })</p>*@ 
             </div>
         </div>
     </div>

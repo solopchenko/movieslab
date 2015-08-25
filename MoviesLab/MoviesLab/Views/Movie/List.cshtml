@@ -21,10 +21,14 @@
     </div>
 }
 
+<h3 class="text-info">@ViewBag.StatusMessage</h3>
+
 <h1>@ViewBag.Title</h1>
 
-
-<a href="/Movie/Add" class="btn btn-success btn-xs">Добавить фильм</a>
+@if (User.IsInRole("Администратор"))
+{
+    <a href="/Movie/Add" class="btn btn-success btn-xs">Добавить фильм</a>
+}
 
 <hr />
 

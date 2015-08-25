@@ -12,12 +12,15 @@
     <title>@ViewBag.Title</title>
 </head>
 <body>
+    <h3 class="text-info">@ViewBag.StatusMessage</h3>
+
     <h1>@ViewBag.Title</h1>
 
-    <a href="/Movie/Edit?MovieId=@Model.MovieId" class="btn btn-warning btn-xs">Редактировать фильм</a>
-    <a href="/Movie/Delete?MovieId=@Model.MovieId" class="btn btn-danger btn-xs">Удалить фильм</a>
-
-    <p class="text-success">@ViewBag.StatusMessage</p>
+    @if (User.IsInRole("Администратор"))
+    {
+        <a href="/Movie/Edit?MovieId=@Model.MovieId" class="btn btn-warning btn-xs">Редактировать</a>
+        <a href="/Movie/Delete?MovieId=@Model.MovieId" class="btn btn-danger btn-xs">Удалить</a>
+    }
 
     <hr />
 
@@ -45,7 +48,7 @@
                     <p><a class="btn-sm btn-success" href="/Movie/AddFavorite?MovieId=@Model.MovieId">Добавить в избранное</a></p>
                 }
             }
-            
+
 
             @if (@Model.Genre.Count > 0)
             {
@@ -73,7 +76,42 @@
             <div>
                 <a href="/Movie/List">Вернуться к списку фильмов</a>
             </div>
+
         </div>
+
+            <div class="col-md-4">
+                @if (@Model.Actor.Count > 0)
+                {
+                    <p><b>Актеры:</b></p>
+                    <ul>
+                        @foreach (var a in Model.Actor)
+                        {
+                            <li>
+                                <a href="/Person?PersonId=@a.Person.PersonId">@a.Person.Fullname</a>
+                                <ul>
+                                    <li>@a.Character</li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                @if (@Model.FilmCrew.Count > 0)
+                {
+                    <p><b>Съёмочная группа:</b></p>
+                    <ul>
+                        @foreach (var fc in Model.FilmCrew)
+                        {
+                            <li>
+                                <a href="/Person?PersonId=@fc.Person.PersonId">@fc.Person.Fullname</a>
+                                <ul>
+                                    <li>@fc.CrewPosition.Name</li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
     </div>
 </body>
 </html>

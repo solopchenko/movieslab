@@ -20,8 +20,14 @@ namespace MoviesLab.Controllers
 
         //Список фильмов
         [AllowAnonymous]
-        public ActionResult List(int? page)
+        public ActionResult List(int? page, StatusMessage? message)
         {
+            ViewBag.StatusMessage =
+            message == StatusMessage.MovieDeleteError ? "При удалении фильма произошла ошибка."
+            : message == StatusMessage.MovieNotFound ? "Фильм не найден."
+            : message == StatusMessage.MovieDeleted ? "Доступ к фильму ограничен."
+            : "";
+
             //Получаем из базы данных все объекты Movie
             List<Movie> movies = db.Movies.Where(m => m.Delete == false).ToList();
 
@@ -33,22 +39,50 @@ namespace MoviesLab.Controllers
             return View(movies.ToPagedList(pageNumber, pageSize));
         }
 
-        [AllowAnonymous]
-        public ActionResult Index(int? MovieId, FavMessageId? message)
+        //Список удаленных фильмов
+        [Authorize(Roles = "Администратор")]
+        public ActionResult Deleted(int? page, StatusMessage? message)
         {
             ViewBag.StatusMessage =
-            message == FavMessageId.AddSuccess ? "Фильм добавлен в избранное."
-            : message == FavMessageId.DeleteSuccess ? "Фильм удалён из избранного."
-            : message == FavMessageId.Error ? "Произошла ошибка."
+            message == StatusMessage.MovieDeleteSuccess ? "Фильм успешно удалён."
+            : message == StatusMessage.MovieRestoreError ? "Не удалось восстановить фильм."
+            : message == StatusMessage.MovieRestoreSuccess ? "Фильм успешно восстановлен."
+            : "";
+
+            //Получаем из базы данных все объекты Movie
+            List<Movie> movies = db.Movies.Where(m => m.Delete == true).ToList();
+
+            //Количесство объектов на странице
+            int pageSize = 5;
+            int pageNumber = (page ?? 1);
+
+            //Возвращаем представление
+            return View("Deleted", (movies.ToPagedList(pageNumber, pageSize)));
+        }
+
+        [AllowAnonymous]
+        public ActionResult Index(int? MovieId, StatusMessage? message)
+        {
+            ViewBag.StatusMessage =
+            message == StatusMessage.FavAddSuccess ? "Фильм успешно добавлен в избранное."
+            : message == StatusMessage.FavAddError ? "Ошибка добавления фильма в избранное."
+            : message == StatusMessage.FavDeleteSuccess ? "Фильм успешно удалён из избранного."
+            : message == StatusMessage.FavDeleteError ? "Ошибка удаления фильма из избранного."
             : "";
 
             Movie movie = db.Movies.Find(MovieId);
-            if ((movie == null) || (movie.Delete == true))
+            if (movie == null)
             {
-                return RedirectToAction("List");
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
+            }
+
+            if (movie.Delete == true)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
             }
 
             ViewBag.MovieInFav = false;
+            ViewBag.MovieDeleted = movie.Delete;
             
             if (User.Identity.IsAuthenticated)
             {
@@ -85,9 +119,9 @@ namespace MoviesLab.Controllers
             if (selectedGenres != null)
             {
                 //Получаем выбраные жанры
-                foreach (var g in db.Genres.Where(gen => selectedGenres.Contains(gen.GenreId)))
+                foreach (var genre in db.Genres.Where(g => selectedGenres.Contains(g.GenreId)))
                 {
-                    movie.Genre.Add(g);
+                    movie.Genre.Add(genre);
                 }
             }
 
@@ -96,9 +130,9 @@ namespace MoviesLab.Controllers
             if (selectedCountries != null)
             {
                 //Получаем выбраные страны
-                foreach (var c in db.Countries.Where(co => selectedCountries.Contains(co.CountryId)))
+                foreach (var country in db.Countries.Where(c => selectedCountries.Contains(c.CountryId)))
                 {
-                    movie.Country.Add(c);
+                    movie.Country.Add(country);
                 }
             }
 
@@ -113,12 +147,6 @@ namespace MoviesLab.Controllers
             db.SaveChanges();
 
             return Redirect("/Movie?MovieId=" + movie.MovieId);
-
-//            if (ModelState.IsValid)
-//            {
-                
-            //}
-            //return View(movie);
         }
 
         [HttpGet]
@@ -128,7 +156,12 @@ namespace MoviesLab.Controllers
             Movie movie = db.Movies.Find(MovieId);
             if (movie == null)
             {
-                return RedirectToAction("List");
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
+            }
+
+            if (movie.Delete == true)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
             }
 
             ViewBag.Genres = db.Genres.ToList();
@@ -152,9 +185,9 @@ namespace MoviesLab.Controllers
             if (selectedGenres != null)
             {
                 //Получаем выбраные жанры
-                foreach (var g in db.Genres.Where(gen => selectedGenres.Contains(gen.GenreId)))
+                foreach (var genre in db.Genres.Where(g => selectedGenres.Contains(g.GenreId)))
                 {
-                    newMovie.Genre.Add(g);
+                    newMovie.Genre.Add(genre);
                 }
             }
 
@@ -162,9 +195,9 @@ namespace MoviesLab.Controllers
             if (selectedCountries != null)
             {
                 //Получаем выбраные страны
-                foreach (var c in db.Countries.Where(co => selectedCountries.Contains(co.CountryId)))
+                foreach (var country in db.Countries.Where(c => selectedCountries.Contains(c.CountryId)))
                 {
-                    newMovie.Country.Add(c);
+                    newMovie.Country.Add(country);
                 }
             }
 
@@ -178,32 +211,69 @@ namespace MoviesLab.Controllers
         public ActionResult Delete(int? MovieId)
         {
             Movie movie = db.Movies.Find(MovieId);
-            if ((movie != null) || (movie.Delete == false))
+
+            if (movie == null)
             {
-                movie.Delete = true;
-                db.Entry(movie).State = EntityState.Modified;
-                db.SaveChanges();
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
             }
 
+            if (movie.Delete == true)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
+            }
+
+            movie.Delete = true;
+            db.Entry(movie).State = EntityState.Modified;
+            db.SaveChanges();
+
             //Возвращаемся к списку фильмов
-            return RedirectToAction("List");
+            return RedirectToAction("Deleted", new { message = StatusMessage.MovieDeleteSuccess });
         }
 
-               [HttpGet]
+
+        [Authorize(Roles = "Администратор")]
+        public ActionResult Restore(int? MovieId)
+        {
+            Movie movie = db.Movies.Find(MovieId);
+
+            if (movie == null)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
+            }
+
+            if (movie.Delete == false)
+            {
+                return RedirectToAction("Deleted", new { message = StatusMessage.MovieRestoreError });
+            }
+
+            movie.Delete = false;
+            db.Entry(movie).State = EntityState.Modified;
+            db.SaveChanges();
+
+            //Возвращаемся к списку фильмов
+            return RedirectToAction("Deleted", new { message = StatusMessage.MovieRestoreSuccess });
+        }
+
+
+        [HttpGet]
         [Authorize(Roles = "Администратор")]
         public ActionResult AddActor(int? MovieId)
         {
             ViewBag.People = new SelectList(db.People, "PersonId", "FullnameWithYears");
 
             Movie movie = db.Movies.Find(MovieId);
+
             if (movie == null)
             {
-                return HttpNotFound();
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
             }
-            else
+
+            if (movie.Delete == true)
             {
-                ViewBag.Movie = movie;
+                return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
             }
+
+            ViewBag.Movie = movie;
 
             return View();
         }
@@ -218,6 +288,40 @@ namespace MoviesLab.Controllers
             return Redirect("/Movie?MovieId=" + actor.MovieId);
         }
 
+        //// Добавление актера к фильму через модальное окно
+        //[HttpGet]
+        //public ActionResult AddActor1(int? MovieId)
+        //{
+        //    ViewBag.People = new SelectList(db.People, "PersonId", "FullnameWithYears");
+
+        //    Movie movie = db.Movies.Find(MovieId);
+
+        //    if (movie == null)
+        //    {
+        //        return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
+        //    }
+
+        //    if (movie.Delete == true)
+        //    {
+        //        return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
+        //    }
+
+        //    ViewBag.Movie = movie;
+
+        //    //return View();
+        //    return PartialView("_AddActor");
+        //}
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult AddActor1(Actor actor)
+        //{
+        //    db.Actors.Add(actor);
+        //    db.SaveChanges();
+
+        //    return Redirect("/Movie/Edit?MovieId=" + actor.MovieId);
+        //}
+
         [HttpGet]
         [Authorize(Roles = "Администратор")]
         public ActionResult AddPerson(int? MovieId)
@@ -226,14 +330,18 @@ namespace MoviesLab.Controllers
             ViewBag.CrewPositions = new SelectList(db.CrewPositions, "PositionId", "Name");
 
             Movie movie = db.Movies.Find(MovieId);
+
             if (movie == null)
             {
-                return HttpNotFound();
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
             }
-            else
+
+            if (movie.Delete == true)
             {
-                ViewBag.Movie = movie;
+                return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
             }
+
+            ViewBag.Movie = movie;
 
             return View();
         }
@@ -252,24 +360,30 @@ namespace MoviesLab.Controllers
         [Authorize(Roles = "Пользователь")]
         public ActionResult AddFavorite(int movieId)
         {
-            Movie m = db.Movies.Find(movieId);
-            if (m == null)
+            Movie movie = db.Movies.Find(movieId);
+
+            if (movie == null)
             {
-                return RedirectToAction("Index", new { movieId = m.MovieId, message = FavMessageId.Error });
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
+            }
+
+            if (movie.Delete == true)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
             }
 
             var currentUser = db.Users.Find(User.Identity.GetUserId());
 
-            if(m.User.Contains(currentUser))
+            if(movie.User.Contains(currentUser))
             {
-                return RedirectToAction("Index", new { movieId = m.MovieId, message = FavMessageId.Error });
+                return RedirectToAction("Index", new { movieId = movie.MovieId, message = StatusMessage.FavAddError });
             }
             else
             {
-                m.User.Add(currentUser);
-                db.Entry(m).State = EntityState.Modified;
+                movie.User.Add(currentUser);
+                db.Entry(movie).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index", new { movieId = m.MovieId, message = FavMessageId.AddSuccess });
+                return RedirectToAction("Index", new { movieId = movie.MovieId, message = StatusMessage.FavAddSuccess });
             }
         }
 
@@ -277,24 +391,30 @@ namespace MoviesLab.Controllers
         [Authorize(Roles = "Пользователь")]
         public ActionResult DeleteFavorite(int movieId)
         {
-            Movie m = db.Movies.Find(movieId);
-            if (m == null)
+            Movie movie = db.Movies.Find(movieId);
+
+            if (movie == null)
             {
-                return RedirectToAction("Index", new { movieId = m.MovieId, message = FavMessageId.Error });
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
+            }
+
+            if (movie.Delete == true)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
             }
 
             var currentUser = db.Users.Find(User.Identity.GetUserId());
 
-            if (m.User.Contains(currentUser))
+            if (movie.User.Contains(currentUser))
             {
-                m.User.Remove(currentUser);
-                db.Entry(m).State = EntityState.Modified;
+                movie.User.Remove(currentUser);
+                db.Entry(movie).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index", new { movieId = m.MovieId, message = FavMessageId.DeleteSuccess });
+                return RedirectToAction("Index", new { movieId = movie.MovieId, message = StatusMessage.FavDeleteSuccess });
             }
             else
             {
-                return RedirectToAction("Index", new { movieId = m.MovieId, message = FavMessageId.Error });
+                return RedirectToAction("Index", new { movieId = movie.MovieId, message = StatusMessage.FavDeleteError });
             }
         }
 
@@ -304,29 +424,36 @@ namespace MoviesLab.Controllers
         {
             MoviesLabUser user = db.Users.Find(User.Identity.GetUserId());
 
-            List<Movie> fm = new List<Movie>();
+            List<Movie> favMovie = new List<Movie>();
             if (user.FavMovie != null)
             {
-                fm = user.FavMovie.ToList();
+                favMovie = user.FavMovie.Where(fm => fm.Delete = false).ToList();
             }
 
-            return View(fm);
+            return View(favMovie);
         }
 
         [AllowAnonymous]
-        public PartialViewResult MovieSearch(string search)
+        public PartialViewResult MoviesSearch(string search)
         {
 
-            List<Movie> movies = db.Movies.Where(b => b.Title.Contains(search) || b.Description.Contains(search)).Distinct().ToList();
+            List<Movie> movies = db.Movies.Where((m => m.Title.Contains(search) && m.Delete == false || m.Description.Contains(search) && m.Delete == false)).Distinct().ToList();
 
             return PartialView("_Search", movies);
         }
 
-
-        public enum FavMessageId
+        public enum StatusMessage
         {
-            AddSuccess,
-            DeleteSuccess,
+            FavAddSuccess,
+            FavAddError,
+            FavDeleteSuccess,
+            FavDeleteError,
+            MovieDeleteSuccess,
+            MovieDeleteError,
+            MovieNotFound,
+            MovieDeleted,
+            MovieRestoreSuccess,
+            MovieRestoreError,
             Error
         }
     }
