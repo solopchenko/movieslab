@@ -1,16 +1,16 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title – приложение ASP.NET</title>
+    <title>@ViewBag.Title | MoviesLab</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-default navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -18,23 +18,63 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Имя приложения", "Index", "Home", null, new { @class = "navbar-brand" })
+                @Html.ActionLink("MoviesLab", "Index", "Home", null, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Домашняя страница", "Index", "Home")</li>
-                    <li>@Html.ActionLink("О программе", "About", "Home")</li>
-                    <li>@Html.ActionLink("Контакт", "Contact", "Home")</li>
+                    
+                    @if(User.IsInRole("Администратор"))
+                    {
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Фильмы<span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>@Html.ActionLink("Список фильмов", "List", "Movie")</li>
+                                <li>@Html.ActionLink("Добавить фильм", "Add", "Movie")</li>
+                                <li>@Html.ActionLink("Скрытые фильмы", "Deleted", "Movie")</li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Персоны<span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>@Html.ActionLink("Список персон", "List", "Person")</li>
+                                <li>@Html.ActionLink("Добавить персону", "Add", "Person")</li>
+                                <li>@Html.ActionLink("Скрытые персоны", "Deleted", "Person")</li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>@Html.ActionLink("Фильмы", "List", "Movie")</li>
+                        <li>@Html.ActionLink("Персоны", "List", "Person")</li>
+                    }
+                    
+                    @if(User.IsInRole("Пользователь"))
+                    {
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Избранное<span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>@Html.ActionLink("Избранные фильмы", "Favorites", "Movie")</li>
+                                <li>@Html.ActionLink("Избранные персоны", "Favorites", "Person")</li>
+                            </ul>
+                        </li>
+                    }
+
+                    <li>@Html.ActionLink("О проекте", "About", "Home")</li>
+
                 </ul>
+
                 @Html.Partial("_LoginPartial")
             </div>
         </div>
     </div>
+    <br />
     <div class="container body-content">
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year – приложение ASP.NET</p>
+            <p>MoviesLab &copy; @DateTime.Now.Year</p>
+            <p><a href="http://ssolopchenko.ru" target="_blank">Svyatoslav Solopchenko</a></p>
         </footer>
     </div>
 

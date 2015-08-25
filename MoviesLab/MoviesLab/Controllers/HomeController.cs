@@ -14,11 +14,11 @@ namespace MoviesLab.Controllers
 
         public ActionResult Index()
         {
-            List<Movie> movies = db.Movies.OrderByDescending(m => m.MovieId).Take(3).ToList();
+            List<Movie> movies = db.Movies.Where(m => m.Delete == false).OrderByDescending(m => m.MovieId).Take(3).ToList();
 
             ViewBag.Movies = movies;
 
-            List<Person> people = db.People.OrderByDescending(p => p.PersonId).Take(3).ToList();
+            List<Person> people = db.People.Where(p => p.Delete == false).OrderByDescending(p => p.PersonId).Take(3).ToList();
 
             ViewBag.People = people;
 
@@ -27,8 +27,6 @@ namespace MoviesLab.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
-
             return View();
         }
     }
