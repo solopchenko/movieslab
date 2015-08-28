@@ -4,6 +4,8 @@
     ViewBag.Title = "Редактирование фильма";
 }
 
+<h3 class="text-info">@ViewBag.StatusMessage</h3>
+
 <h1>@ViewBag.Title</h1>
 
 
@@ -91,7 +93,10 @@
                 <ul>
                     @foreach (var r in Model.Actor)
                     {
-                        <li>@r.Person.Fullname: @r.Character (удалить)</li>
+                        <li>
+                            @r.Person.Fullname: @r.Character 
+                            <p><a class="btn btn-danger btn-xs" href="DeleteActor?PersonId=@r.PersonId&MovieId=@r.MovieId&Character=@r.Character">Удалить</a></p>
+                        </li>
                     }
                 </ul>
                 <p><a class="btn btn-primary btn-sm" href="AddActor?MovieId=@Html.DisplayFor(model => model.MovieId)">Добавить актера</a></p>
@@ -104,11 +109,13 @@
                 <ul>
                     @foreach (var r in Model.FilmCrew)
                     {
-                        <li>@r.Person.Fullname: @r.CrewPosition.Name (удалить)</li>
+                        <li>
+                            @r.Person.Fullname: @r.CrewPosition.Name 
+                            <p><a class="btn btn-danger btn-xs" href="DeletePerson?PersonId=@r.PersonId&MovieId=@r.MovieId&PositionId=@r.PositionId">Удалить</a></p>
+                        </li>
                     }
                 </ul>
                 <p><a class="btn btn-primary btn-sm" href="AddPerson?MovieId=@Html.DisplayFor(model => model.MovieId)">Добавить участника съёмочной группы</a></p>
-                @*<p> @Html.ActionLink("Добавить", "AddActor1", "Movie", new { movieId = Model.MovieId, @class = "viewDialog", data_dialog_title = "Создание модели" })</p>*@ 
             </div>
         </div>
     </div>

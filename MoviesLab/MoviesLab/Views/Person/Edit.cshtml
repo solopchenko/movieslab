@@ -4,6 +4,8 @@
     ViewBag.Title = "Редактирование информации о персоне";
 }
 
+<h3 class="text-info">@ViewBag.StatusMessage</h3>
+
 <h1>@ViewBag.Title</h1>
 
 
@@ -84,7 +86,9 @@
                 <ul>
                     @foreach (var r in Model.Actor)
                     {
-                        <li>@r.Movie.TitleWithYear: @r.Character</li>
+                        <li>@r.Movie.TitleWithYear: @r.Character
+                            <p><a class="btn btn-danger btn-xs" href="DeleteRole?PersonId=@r.PersonId&MovieId=@r.MovieId&Character=@r.Character">Удалить</a></p>
+                        </li>
                     }
                 </ul>
                 <p><a class="btn btn-primary btn-sm" href="AddRole?PersonId=@Html.DisplayFor(model => model.PersonId)">Добавить роль</a></p>
@@ -98,7 +102,10 @@
                 <ul>
                     @foreach (var r in Model.FilmCrew)
                     {
-                        <li>@r.Movie.TitleWithYear: @r.CrewPosition.Name</li>
+                        <li>
+                            @r.Movie.TitleWithYear: @r.CrewPosition.Name 
+                            <p><a class="btn btn-danger btn-xs" href="DeleteMovie?PersonId=@r.PersonId&MovieId=@r.MovieId&PositionId=@r.PositionId">Удалить</a></p>
+                        </li>
                     }
                 </ul>
                 <p><a class="btn btn-primary btn-sm" href="AddMovie?PersonId=@Html.DisplayFor(model => model.PersonId)">Добавить участие в фильме</a></p>

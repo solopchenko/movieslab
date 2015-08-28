@@ -151,8 +151,17 @@ namespace MoviesLab.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Администратор")]
-        public ActionResult Edit(int? MovieId)
+        public ActionResult Edit(int? MovieId, StatusMessage? message)
         {
+            ViewBag.StatusMessage =
+            message == StatusMessage.ActorNotFound ? "Актер не найден."
+            : message == StatusMessage.PersonDeleted ? "Доступ к персоне ограничен."
+            : message == StatusMessage.PersonNotFound ? "Персона не найдена."
+            : message == StatusMessage.PositionNotFound ? "Участник съёмочной группы не найден."
+            : message == StatusMessage.ActorDeleteSuccess ? "Роль успешно удалена."
+            : message == StatusMessage.PersonDeleteSuccess ? "Персона успешно удалена из участников съёмочной группы."
+            : "";
+
             Movie movie = db.Movies.Find(MovieId);
             if (movie == null)
             {
@@ -259,7 +268,7 @@ namespace MoviesLab.Controllers
         [Authorize(Roles = "Администратор")]
         public ActionResult AddActor(int? MovieId)
         {
-            ViewBag.People = new SelectList(db.People, "PersonId", "FullnameWithYears");
+            ViewBag.People = new SelectList(db.People.Where(p => p.Delete == false), "PersonId", "FullnameWithYears");
 
             Movie movie = db.Movies.Find(MovieId);
 
@@ -285,7 +294,45 @@ namespace MoviesLab.Controllers
             db.Actors.Add(actor);
             db.SaveChanges();
 
-            return Redirect("/Movie?MovieId=" + actor.MovieId);
+            return Redirect("/Movie/Edit?MovieId=" + actor.MovieId);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Администратор")]
+        public ActionResult DeleteActor(int PersonId, int MovieId, string Character)
+        {
+            Person person = db.People.Find(PersonId);
+            if (person == null)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.PersonNotFound });
+            }
+
+            if (person.Delete == true)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.PersonDeleted });
+            }
+
+            Movie movie = db.Movies.Find(MovieId);
+            if (movie == null)
+            {
+                return RedirectToAction("Edit", new { message = StatusMessage.MovieNotFound });
+            }
+
+            if (movie.Delete == true)
+            {
+                return RedirectToAction("Edit", new { message = StatusMessage.MovieDeleted });
+            }
+
+            Actor actor = db.Actors.Find(PersonId, MovieId, Character);
+            if (actor == null)
+            {
+                return RedirectToAction("Edit", new { message = StatusMessage.ActorNotFound });
+            }
+
+            db.Actors.Remove(actor);
+            db.SaveChanges();
+
+            return RedirectToAction("Edit", new { MovieId = MovieId, message = StatusMessage.ActorDeleteSuccess });
         }
 
         //// Добавление актера к фильму через модальное окно
@@ -326,7 +373,7 @@ namespace MoviesLab.Controllers
         [Authorize(Roles = "Администратор")]
         public ActionResult AddPerson(int? MovieId)
         {
-            ViewBag.People = new SelectList(db.People, "PersonId", "FullnameWithYears");
+            ViewBag.People = new SelectList(db.People.Where(p => p.Delete == false), "PersonId", "FullnameWithYears");
             ViewBag.CrewPositions = new SelectList(db.CrewPositions, "PositionId", "Name");
 
             Movie movie = db.Movies.Find(MovieId);
@@ -353,7 +400,46 @@ namespace MoviesLab.Controllers
             db.FilmCrew.Add(filmCrew);
             db.SaveChanges();
 
-            return Redirect("/Movie?MovieId=" + filmCrew.MovieId);
+            return Redirect("/Movie/Edit?MovieId=" + filmCrew.MovieId);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Администратор")]
+        public ActionResult DeletePerson(int PersonId, int MovieId, int PositionId)
+        {
+            Person person = db.People.Find(PersonId);
+            if (person == null)
+            {
+                return RedirectToAction("Edit", new { message = StatusMessage.PersonNotFound });
+            }
+
+            if (person.Delete == true)
+            {
+                return RedirectToAction("Edit", new { message = StatusMessage.PersonDeleted });
+            }
+
+            Movie movie = db.Movies.Find(MovieId);
+            if (movie == null)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.MovieNotFound });
+            }
+
+            if (movie.Delete == true)
+            {
+                return RedirectToAction("List", new { message = StatusMessage.MovieDeleted });
+            }
+
+
+            FilmCrew filmCrew = db.FilmCrew.Find(PersonId, MovieId, PositionId);
+            if (filmCrew == null)
+            {
+                return RedirectToAction("Edit", new { message = StatusMessage.PositionNotFound });
+            }
+
+            db.FilmCrew.Remove(filmCrew);
+            db.SaveChanges();
+
+            return RedirectToAction("Edit", new { MovieId = MovieId, message = StatusMessage.PersonDeleteSuccess });
         }
 
         [HttpGet]
@@ -454,6 +540,12 @@ namespace MoviesLab.Controllers
             MovieDeleted,
             MovieRestoreSuccess,
             MovieRestoreError,
+            ActorNotFound,
+            PositionNotFound,
+            PersonNotFound,
+            PersonDeleted,
+            PersonDeleteSuccess,
+            ActorDeleteSuccess,
             Error
         }
     }

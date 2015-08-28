@@ -22,6 +22,8 @@ namespace MoviesLab.Models
         [Key, Column(Order = 2)]
         public int PositionId { get; set; }
 
+
+
         [ForeignKey("PositionId")]
         public virtual CrewPosition CrewPosition { get; set; }
 
