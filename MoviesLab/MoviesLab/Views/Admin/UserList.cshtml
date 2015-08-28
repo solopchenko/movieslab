@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Список пользователей";
+}
+
+@model PagedList.IPagedList<MoviesLab.Models.MoviesLabUser>
+@using PagedList.Mvc;
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+<h3 class="text-info">@ViewBag.StatusMessage</h3>
+
+<h1>@ViewBag.Title</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-hover ">
+            <thead>
+                <tr>
+                    <th>Имя Фамилия</th>
+                    <th>Логин</th>
+                    <th>Управление</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var m in Model)
+                {
+                    if (m.isAdmin)
+                    {
+                        <tr class="success">
+                            <td>@m.FullName</td>
+                            <td>@m.UserName</td>
+                            <td><a href="/Admin/DeleteAdminPermission?userId=@m.Id">Убрать из администраторов</a></td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>@m.FullName</td>
+                            <td>@m.UserName</td>
+                            <td><a href="/Admin/GrantAdminPermission?userId=@m.Id">Назначить администратором</a></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        @Html.PagedListPager(Model, page => Url.Action("List", new { page }))
+        Страница @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) из @Model.PageCount
+    </div>
+
+</div>
+
+
+@Scripts.Render("~/scripts/jquery-1.10.2.min.js")
+@Scripts.Render("~/scripts/jquery.unobtrusive-ajax.min.js")

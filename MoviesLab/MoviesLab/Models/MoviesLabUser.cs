@@ -25,30 +25,30 @@ namespace MoviesLab.Models
         [Display(Name = "Избранные персоны")]
         public virtual ICollection<Person> FavPerson { get; set; }
 
-        //public string FullName
-        //{
-        //    get
-        //    {
-        //        return Name + " " + Surname;
-        //    }
-        //}
+        public string FullName
+        {
+            get
+            {
+                return Name + " " + Surname;
+            }
+        }
 
-        //public bool isAdmin
-        //{
-        //    get
-        //    {
-        //        if (Roles.Count > 0)
-        //        {
-        //            foreach (var r in Roles)
-        //            {
-        //                if (r.Role.Name == "Администратор")
-        //                    return true;
-        //            }
-        //        }
+        public bool isAdmin
+        {
+            get
+            {
+                if (Roles.Count > 0)
+                {
+                    foreach (var r in Roles)
+                    {
+                        if (r.Role.Name == "Администратор")
+                            return true;
+                    }
+                }
 
-        //        return false;
-        //    }
-        //}
+                return false;
+            }
+        }
 
         //public bool ChangeName(string newName, string newSurname)
         //{
